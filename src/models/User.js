@@ -38,10 +38,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    // Additional fields for password management
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
   },
   {
     timestamps: true, // This creates createdAt and updatedAt
@@ -63,28 +59,9 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Update passwordChangedAt when password is changed
-userSchema.pre("save", function (next) {
-  if (!this.isModified("password") || this.isNew) return next();
-  this.passwordChangedAt = Date.now() - 1000; // Subtract 1s to ensure token is created after password change
-  next();
-});
-
 // Instance method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Instance method to check if password was changed after JWT was issued
-userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-  if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10,
-    );
-    return JWTTimestamp < changedTimestamp;
-  }
-  return false;
 };
 
 const User = mongoose.model("User", userSchema);

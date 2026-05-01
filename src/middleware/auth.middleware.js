@@ -46,20 +46,10 @@ const authenticateToken = asyncHandler(async (req, res, next) => {
       return next(new AppError("Your account has been deactivated", 401));
     }
 
-    // Check if user changed password after token was issued
-    if (user.changedPasswordAfter(decoded.iat)) {
-      return next(
-        new AppError(
-          "User recently changed password. Please login again.",
-          401,
-        ),
-      );
-    }
-
     // Grant access to protected route
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     return next(new AppError("Not authorized to access this route", 401));
   }
 });
