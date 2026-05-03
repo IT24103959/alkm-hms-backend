@@ -24,6 +24,8 @@ app.get("/health", (req, res) => {
 
 // API Routes - will be imported from modules
 app.use("/api/v1/auth", require("./routes/authRoutes"));
+
+// API routes for housekeeping and maintenance modules
 app.use(
   "/api/v1/housekeeping",
   require("./modules/housekeeping-maintenance/routes/housekeepingRoutes"),
