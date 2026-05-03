@@ -45,6 +45,12 @@ app.use(
   require("./modules/room-management/routes/roomBookingRoutes"),
 );
 
+// Event Management
+app.use(
+  "/api/v1/event-bookings",
+  require("./modules/event-management/routes/eventBookingRoutes"),
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
