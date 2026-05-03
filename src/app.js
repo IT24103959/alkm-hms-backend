@@ -45,6 +45,24 @@ app.use(
   require("./modules/room-management/routes/roomBookingRoutes"),
 );
 
+// Payroll Management
+app.use(
+  "/api/v1/payroll",
+  require("./modules/user-payroll/routes/payrollRoutes"),
+);
+
+// Restaurant & Dining
+app.use(
+  "/api/v1/restaurant",
+  require("./modules/restaurant-dining/routes/restaurantRoutes"),
+);
+
+// Event Management
+app.use(
+  "/api/v1/events",
+  require("./modules/event-management/routes/eventBookingRoutes"),
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

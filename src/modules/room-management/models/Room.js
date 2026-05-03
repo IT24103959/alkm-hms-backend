@@ -73,7 +73,6 @@ const roomSchema = new mongoose.Schema(
     },
 );
 
-roomSchema.index({ roomNumber: 1 });
 roomSchema.index({ roomStatus: 1 });
 roomSchema.index({ roomType: 1 });
 

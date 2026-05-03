@@ -2,6 +2,7 @@ const User = require("../models/User");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../middleware/error.middleware");
 const { sendTokenResponse } = require("../utils/jwtUtils");
+const ApiResponse = require("../utils/apiResponse");
 
 /**
  * @desc    Register a new user
@@ -9,7 +10,21 @@ const { sendTokenResponse } = require("../utils/jwtUtils");
  * @access  Public (or Admin only - depending on requirements)
  */
 exports.register = asyncHandler(async (req, res, next) => {
-  const { username, password, fullName, role } = req.body;
+  const {
+    username,
+    password,
+    fullName,
+    role,
+    photoUrl,
+    position,
+    basicSalary,
+    attendance,
+    overtimeHours,
+    absentDays,
+    overtimeRate,
+    dailyRate,
+    enabled,
+  } = req.body;
 
   // Check if user already exists
   const existingUser = await User.findOne({ username });
@@ -23,6 +38,15 @@ exports.register = asyncHandler(async (req, res, next) => {
     password,
     fullName,
     role,
+    photoUrl,
+    position,
+    basicSalary,
+    attendance,
+    overtimeHours,
+    absentDays,
+    overtimeRate,
+    dailyRate,
+    enabled,
   });
 
   // Send token response
@@ -90,6 +114,7 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
   const fieldsToUpdate = {
     fullName: req.body.fullName,
     username: req.body.username,
+    photoUrl: req.body.photoUrl,
   };
 
   // Remove undefined fields
@@ -108,6 +133,52 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
       user,
     },
   });
+});
+
+/**
+ * @desc    Create user (Admin only)
+ * @route   POST /api/v1/auth/users
+ * @access  Private/Admin
+ */
+exports.createUser = asyncHandler(async (req, res, next) => {
+  const {
+    username,
+    password,
+    fullName,
+    role,
+    photoUrl,
+    position,
+    basicSalary,
+    attendance,
+    overtimeHours,
+    absentDays,
+    overtimeRate,
+    dailyRate,
+    enabled,
+  } = req.body;
+
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    return next(new AppError("User with this username already exists", 400));
+  }
+
+  const user = await User.create({
+    username,
+    password,
+    fullName,
+    role,
+    photoUrl,
+    position,
+    basicSalary,
+    attendance,
+    overtimeHours,
+    absentDays,
+    overtimeRate,
+    dailyRate,
+    enabled,
+  });
+
+  ApiResponse.success(res, { user }, "User created successfully", 201);
 });
 
 /**
@@ -167,13 +238,7 @@ exports.logout = asyncHandler(async (req, res, next) => {
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find();
 
-  res.status(200).json({
-    status: "success",
-    results: users.length,
-    data: {
-      users,
-    },
-  });
+  ApiResponse.success(res, { users }, "Users retrieved successfully");
 });
 
 /**
@@ -202,22 +267,49 @@ exports.getUser = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin
  */
 exports.updateUser = asyncHandler(async (req, res, next) => {
-  const { username, fullName, role, enabled } = req.body;
+  const {
+    username,
+    fullName,
+    role,
+    enabled,
+    photoUrl,
+    position,
+    basicSalary,
+    attendance,
+    overtimeHours,
+    absentDays,
+    overtimeRate,
+    dailyRate,
+    password,
+  } = req.body;
 
   const fieldsToUpdate = {};
   if (username) fieldsToUpdate.username = username;
   if (fullName) fieldsToUpdate.fullName = fullName;
   if (role) fieldsToUpdate.role = role;
   if (enabled !== undefined) fieldsToUpdate.enabled = enabled;
+  if (photoUrl !== undefined) fieldsToUpdate.photoUrl = photoUrl;
+  if (position !== undefined) fieldsToUpdate.position = position;
+  if (basicSalary !== undefined) fieldsToUpdate.basicSalary = basicSalary;
+  if (attendance !== undefined) fieldsToUpdate.attendance = attendance;
+  if (overtimeHours !== undefined) fieldsToUpdate.overtimeHours = overtimeHours;
+  if (absentDays !== undefined) fieldsToUpdate.absentDays = absentDays;
+  if (overtimeRate !== undefined) fieldsToUpdate.overtimeRate = overtimeRate;
+  if (dailyRate !== undefined) fieldsToUpdate.dailyRate = dailyRate;
 
-  const user = await User.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
-    new: true,
-    runValidators: true,
-  });
+  let user = await User.findById(req.params.id).select("+password");
 
   if (!user) {
     return next(new AppError("User not found", 404));
   }
+
+  Object.assign(user, fieldsToUpdate);
+
+  if (password) {
+    user.password = password;
+  }
+
+  await user.save();
 
   res.status(200).json({
     status: "success",

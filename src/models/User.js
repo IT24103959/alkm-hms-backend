@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please provide a full name"],
       trim: true,
     },
+    photoUrl: {
+      type: String,
+      default: null,
+    },
     role: {
       type: String,
       enum: [
@@ -42,30 +46,31 @@ const userSchema = new mongoose.Schema(
     position: {
       type: String,
       default: null,
+      trim: true,
     },
     basicSalary: {
       type: Number,
-      default: null,
+      default: 0,
     },
     attendance: {
       type: Number,
-      default: null,
+      default: 0,
     },
     overtimeHours: {
       type: Number,
-      default: null,
+      default: 0,
     },
     absentDays: {
       type: Number,
-      default: null,
+      default: 0,
     },
     overtimeRate: {
       type: Number,
-      default: null,
+      default: 0,
     },
     dailyRate: {
       type: Number,
-      default: null,
+      default: 0,
     },
   },
   {
