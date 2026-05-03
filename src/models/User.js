@@ -38,6 +38,35 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Staff / payroll fields (only populated for staff roles)
+    position: {
+      type: String,
+      default: null,
+    },
+    basicSalary: {
+      type: Number,
+      default: null,
+    },
+    attendance: {
+      type: Number,
+      default: null,
+    },
+    overtimeHours: {
+      type: Number,
+      default: null,
+    },
+    absentDays: {
+      type: Number,
+      default: null,
+    },
+    overtimeRate: {
+      type: Number,
+      default: null,
+    },
+    dailyRate: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true, // This creates createdAt and updatedAt
