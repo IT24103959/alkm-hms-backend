@@ -24,6 +24,8 @@ app.get("/health", (req, res) => {
 
 // API Routes - will be imported from modules
 app.use("/api/v1/auth", require("./routes/authRoutes"));
+
+// API routes for housekeeping and maintenance modules
 app.use(
   "/api/v1/housekeeping",
   require("./modules/housekeeping-maintenance/routes/housekeepingRoutes"),
@@ -31,6 +33,22 @@ app.use(
 app.use(
   "/api/v1/maintenance",
   require("./modules/housekeeping-maintenance/routes/maintenanceRoutes"),
+);
+
+// Room Management
+app.use(
+  "/api/v1/rooms",
+  require("./modules/room-management/routes/roomRoutes"),
+);
+app.use(
+  "/api/v1/room-bookings",
+  require("./modules/room-management/routes/roomBookingRoutes"),
+);
+
+// Event Management
+app.use(
+  "/api/v1/event-bookings",
+  require("./modules/event-management/routes/eventBookingRoutes"),
 );
 
 // Error handling middleware

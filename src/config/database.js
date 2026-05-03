@@ -1,4 +1,9 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// Use a public DNS resolver when the local environment refuses SRV queries.
+// This helps MongoDB Atlas SRV connections work on Windows / restricted networks.
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const connectDB = async () => {
   try {
