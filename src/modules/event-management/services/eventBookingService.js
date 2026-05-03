@@ -33,7 +33,7 @@ class EventBookingService {
     } else if (!bookingData.createdByUsername) {
       bookingData.createdByUsername = username;
     }
-    const prepared = this._prepareForSave(bookingData, null, null);
+    const prepared = await this._prepareForSave(bookingData, null, null);
     return await EventBooking.create(prepared);
   }
 
@@ -63,7 +63,11 @@ class EventBookingService {
       createdByUsername: existing.createdByUsername,
     };
 
-    const prepared = this._prepareForSave(updated, id, originalEventDateTime);
+    const prepared = await this._prepareForSave(
+      updated,
+      id,
+      originalEventDateTime,
+    );
     return await EventBooking.findByIdAndUpdate(id, prepared, {
       new: true,
       runValidators: false,
@@ -102,7 +106,7 @@ class EventBookingService {
     };
   }
 
-  _prepareForSave(booking, currentId, originalEventDateTime) {
+  async _prepareForSave(booking, currentId, originalEventDateTime) {
     booking.customerName = this._requireText(
       booking.customerName,
       "Customer name is required",
@@ -141,7 +145,7 @@ class EventBookingService {
     }
 
     this._validateHallCapacity(booking.hallName, booking.attendees);
-    this._ensureNoHallConflict(
+    await this._ensureNoHallConflict(
       booking.hallName,
       eventDateTime,
       endDateTime,
