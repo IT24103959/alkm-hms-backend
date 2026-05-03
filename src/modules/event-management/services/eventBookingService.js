@@ -96,6 +96,10 @@ class EventBookingService {
       .sort((a, b) => b.count - a.count);
 
     const eventRevenue = rows.reduce((sum, r) => {
+      const status = (r.status || "").toUpperCase();
+      if (status !== "CONFIRMED" && status !== "COMPLETED") {
+        return sum;
+      }
       return sum + (r.totalPrice || r.totalCost || 0);
     }, 0);
 
