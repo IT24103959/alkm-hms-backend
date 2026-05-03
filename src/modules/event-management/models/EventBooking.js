@@ -70,10 +70,15 @@ const eventBookingSchema = new mongoose.Schema(
       required: [true, "Attendees count is required"],
       min: 1,
     },
+    pricePerHour: {
+      type: Number,
+      required: [true, "Price per hour is required"],
+      min: 0,
+    },
     pricePerGuest: {
       type: Number,
-      required: [true, "Price per guest is required"],
       min: 0,
+      default: 0,
     },
     totalPrice: {
       type: Number,

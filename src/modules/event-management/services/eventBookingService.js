@@ -13,6 +13,12 @@ const VALID_STATUSES = new Set([
 ]);
 const VALID_PACKAGES = new Set(["STANDARD", "PREMIUM"]);
 const PREMIUM_FEE = 10000;
+const HALL_HOURLY_RATES = {
+  'GRAND BALLROOM': 30000,
+  'GARDEN PAVILION': 20000,
+  'CONFERENCE ROOM': 10000,
+  'MINI HALL': 12000,
+};
 const EMAIL_RE = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 const MOBILE_RE = /^\d{10}$/;
 
@@ -57,6 +63,7 @@ class EventBookingService {
       eventDateTime: bookingData.eventDateTime,
       endDateTime: bookingData.endDateTime,
       attendees: bookingData.attendees,
+      pricePerHour: bookingData.pricePerHour,
       pricePerGuest: bookingData.pricePerGuest,
       notes: bookingData.notes,
       status: bookingData.status || existing.status,
@@ -144,9 +151,14 @@ class EventBookingService {
     if (!booking.attendees || booking.attendees <= 0) {
       throw new AppError("Attendees must be greater than 0", 400);
     }
-    if (booking.pricePerGuest == null || booking.pricePerGuest < 0) {
-      throw new AppError("Price per guest must be 0 or greater", 400);
+    if (booking.pricePerHour == null || booking.pricePerHour < 0) {
+      throw new AppError("Price per hour must be 0 or greater", 400);
     }
+    this._validateHourlyRate(
+      booking.hallName,
+      booking.packageName,
+      booking.pricePerHour,
+    );
 
     this._validateHallCapacity(booking.hallName, booking.attendees);
     await this._ensureNoHallConflict(
@@ -161,7 +173,7 @@ class EventBookingService {
       endDateTime,
     );
     const totalPrice = this._calculateTotalPrice(
-      booking.pricePerGuest,
+      booking.pricePerHour,
       durationHours,
       booking.packageName,
     );
@@ -204,10 +216,10 @@ class EventBookingService {
   _validatePackage(packageName) {
     const normalized = this._requireText(
       packageName,
-      "Package name is required",
+      "Package is required",
     ).toUpperCase();
     if (!VALID_PACKAGES.has(normalized)) {
-      throw new AppError("Package name must be Standard or Premium", 400);
+      throw new AppError("Package must be Standard or Premium", 400);
     }
     return normalized.charAt(0) + normalized.slice(1).toLowerCase();
   }
@@ -230,6 +242,28 @@ class EventBookingService {
     if (end <= start) {
       throw new AppError(
         "End date & time must be after starting date & time",
+        400,
+      );
+    }
+  }
+
+  _getHourlyRate(hallName, packageName) {
+    const normalizedHall = hallName ? hallName.trim().toUpperCase() : '';
+    const hallRate = HALL_HOURLY_RATES[normalizedHall];
+    if (hallRate == null) return null;
+    return packageName && packageName.toUpperCase() === 'PREMIUM'
+      ? hallRate + PREMIUM_FEE
+      : hallRate;
+  }
+
+  _validateHourlyRate(hallName, packageName, pricePerHour) {
+    const expected = this._getHourlyRate(hallName, packageName);
+    if (expected == null) {
+      throw new AppError("Invalid hall name or package selected", 400);
+    }
+    if (Math.round(pricePerHour * 100) / 100 !== expected) {
+      throw new AppError(
+        "Price per hour must match the selected hall package rate",
         400,
       );
     }
@@ -272,7 +306,7 @@ class EventBookingService {
 
     if (conflict) {
       throw new AppError(
-        "Hall conflict detected for the selected time range",
+        "Hall is already booked for the selected date & time range",
         400,
       );
     }
@@ -286,8 +320,8 @@ class EventBookingService {
     return Math.round((minutes / 60) * 100) / 100;
   }
 
-  _calculateTotalPrice(pricePerGuest, durationHours, packageName) {
-    let total = pricePerGuest * durationHours;
+  _calculateTotalPrice(pricePerHour, durationHours, packageName) {
+    let total = pricePerHour * durationHours;
     if (packageName && packageName.toUpperCase() === "PREMIUM") {
       total += PREMIUM_FEE;
     }
