@@ -33,6 +33,16 @@ app.use(
   require("./modules/housekeeping-maintenance/routes/maintenanceRoutes"),
 );
 
+// Room Management
+app.use(
+  "/api/v1/rooms",
+  require("./modules/room-management/routes/roomRoutes"),
+);
+app.use(
+  "/api/v1/room-bookings",
+  require("./modules/room-management/routes/roomBookingRoutes"),
+);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
