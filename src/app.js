@@ -22,10 +22,11 @@ app.get("/health", (req, res) => {
   });
 });
 
-// API Routes - will be imported from modules
+// API Routes
 app.use("/api/v1/auth", require("./routes/authRoutes"));
+app.use("/api/v1/dashboard", require("./routes/dashboardRoutes"));
 
-// API routes for housekeeping and maintenance modules
+// Housekeeping & Maintenance
 app.use(
   "/api/v1/housekeeping",
   require("./modules/housekeeping-maintenance/routes/housekeepingRoutes"),
@@ -45,10 +46,27 @@ app.use(
   require("./modules/room-management/routes/roomBookingRoutes"),
 );
 
+// Restaurant & Dining
+app.use(
+  "/api/v1/menu-items",
+  require("./modules/restaurant-dining/routes/menuItemRoutes"),
+);
+app.use(
+  "/api/v1/reservations",
+  require("./modules/restaurant-dining/routes/reservationRoutes"),
+);
+
 // Event Management
 app.use(
   "/api/v1/event-bookings",
   require("./modules/event-management/routes/eventBookingRoutes"),
+);
+
+// Staff & Payroll
+app.use("/api/v1/staff", require("./modules/user-payroll/routes/staffRoutes"));
+app.use(
+  "/api/v1/payroll",
+  require("./modules/user-payroll/routes/payrollRoutes"),
 );
 
 // Error handling middleware
